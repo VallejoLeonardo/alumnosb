@@ -165,14 +165,13 @@ function AlumnoModificar() {
 
   const modificarAlumno = async (data: alumnoEstructura) => {
     const response = await axios
-      .post("http://localhost:5000/alumno/modificar", data)
+      .put("http://localhost:5000/alumno/modificar", data)
       .then((response) => {
         notify(response.data.status);
         setAlumno(initialState);
         setBotones(initialStateBtn);
         setMat("");
       });
-
     setTimeout(() => navigate("/"), 2000);
   };
 
@@ -459,6 +458,23 @@ function AlumnoModificar() {
                 placeholder="Ingrese su telefono (618)6181563424"
                 pattern="^\([0-9]{3}\)[0-9]{7}$"
                 value={telefonoContacto}
+                onChange={handleInputChange}
+                required
+              />
+            </FloatingLabel>
+          </Col>
+          <Col> </Col>
+        </Row>
+
+        <Row className="mt-3">
+          <Col> </Col>
+          <Col md={3}>
+            <FloatingLabel label="Contraseña (visible)">
+              <Form.Control
+                name="contraseña"
+                type="text"
+                placeholder="Ingresa la nueva contraseña"
+                value={contraseña}
                 onChange={handleInputChange}
                 required
               />

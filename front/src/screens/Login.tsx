@@ -175,7 +175,7 @@ const Login: React.FC = () => {
 
                 <div className="mb-3 d-flex justify-content-center">
                   <ReCAPTCHA
-                    sitekey="6Le8z3ErAAAAACvsZixJp1oOOFUbJyrTsjAJ0UlL"
+                    sitekey="6LfGfnMrAAAAAI00b1rVjmjUkOE7gWod3LfnDttx"
                     onChange={(token: string | null) => setRecaptchaToken(token)}
                   />
                 </div>

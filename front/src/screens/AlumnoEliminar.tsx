@@ -111,20 +111,23 @@ function AlumnoEliminar() {
   };
 
   const handleEliminar = async () => {
-    const response = await axios
-      .post(`http://localhost:5000/alumno/eliminar`, alumno)
-      .then((response) => {
-        if (response.data.status === 200) {
-          notify(response.data.status);
-          setAlumno(initialState);
-          setShow(false);
-          setMat("");
-        } else {
-          console.error("Error al eliminar el alumno:", response.data.message);
-        }
-
-        setTimeout(() => navigate("/"), 1000);
+    try {
+      const response = await axios.delete(`http://localhost:5000/alumno/eliminar`, {
+        params: { matricula: alumno.matricula }
       });
+      if (response.data.status === 200) {
+        notify(response.data.status);
+        setAlumno(initialState);
+        setShow(false);
+        setMat("");
+      } else {
+        console.error("Error al eliminar el alumno:", response.data.message);
+      }
+      setTimeout(() => navigate("/"), 1000);
+    } catch (error) {
+      console.error("Error al eliminar el alumno:", error);
+      notify(100);
+    }
   };
 
   const notify = (status: number) => {

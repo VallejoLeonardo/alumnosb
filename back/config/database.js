@@ -3,6 +3,12 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+// Logs para depuración de variables de entorno
+console.log("DB_HOST:", process.env.DB_HOST);
+console.log("DB_USER:", process.env.DB_USER);
+console.log("DB_PASSWORD:", process.env.DB_PASSWORD);
+console.log("DB_NAME:", process.env.DB_NAME);
+
 /**
  * Configuración de la base de datos MySQL
  * Utiliza variables de entorno para mayor seguridad
@@ -12,6 +18,8 @@ export const db = mysql.createPool({
   user: process.env.DB_USER || "umoodle",
   password: process.env.DB_PASSWORD || "Umoodl@2024$",
   database: process.env.DB_NAME || "alumnos",
+  port: process.env.DB_PORT || 3306,
+  family: 4,
   waitForConnections: true,
   connectionLimit: 10,
   maxIdle: 10,

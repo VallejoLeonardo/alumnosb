@@ -4,6 +4,7 @@ import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import dotenv from "dotenv";
+import bcrypt from "bcryptjs";
 
 // Importar configuraciones y rutas
 import { db, testConnection } from "./config/database.js";
@@ -195,7 +196,7 @@ app.get("/alumnos/traer/:nombre", (req, res) => {
 });
 
 // Ruta para agregar un nuevo alumno
-app.post("/alumno/agregar", (req, res) => {
+app.post("/alumno/agregar", async (req, res) => {
   const {
     matricula,
     aPaterno,
@@ -217,50 +218,63 @@ app.post("/alumno/agregar", (req, res) => {
     foto = null, // Asignar null por defecto si no se proporciona
   } = req.body;
 
-  const sql = `INSERT INTO alumnos (matricula, aPaterno, aMaterno, nombre, sexo, dCalle, dNumero, dColonia, dCodigoPostal, aTelefono, aCorreo, aFacebook, aInstagram, tipoSangre, nombreContacto, telefonoContacto, contrasenha, foto) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+  try {
+    // Cifrar la contraseña antes de guardar
+    const saltRounds = 12;
+    const hashedPassword = await bcrypt.hash(contraseña, saltRounds);
 
-  db.query(
-    sql,
-    [
-      matricula,
-      aPaterno,
-      aMaterno,
-      nombre,
-      sexo,
-      dCalle,
-      dNumero,
-      dColonia,
-      dCodigoPostal,
-      aTelefono,
-      aCorreo,
-      aFacebook,
-      aInstagram,
-      aTipoSangre,
-      nombreContacto,
-      telefonoContacto,
-      contraseña,
-      foto,
-    ],
-    (err, result) => {
-      if (err) {
-        console.error("Error al insertar el alumno:", err);
-        res.send({
-          status: 100,
-          errNo: err.errno,
-          mensaje: err.message,
-          codigo: err.code,
-        });
-      } else {
-        res.send({
-          status: 200,
-          result,
-        });
+    const sql = `INSERT INTO alumnos (matricula, aPaterno, aMaterno, nombre, sexo, dCalle, dNumero, dColonia, dCodigoPostal, aTelefono, aCorreo, aFacebook, aInstagram, tipoSangre, nombreContacto, telefonoContacto, contrasenha, foto) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+
+    db.query(
+      sql,
+      [
+        matricula,
+        aPaterno,
+        aMaterno,
+        nombre,
+        sexo,
+        dCalle,
+        dNumero,
+        dColonia,
+        dCodigoPostal,
+        aTelefono,
+        aCorreo,
+        aFacebook,
+        aInstagram,
+        aTipoSangre,
+        nombreContacto,
+        telefonoContacto,
+        hashedPassword,
+        foto,
+      ],
+      (err, result) => {
+        if (err) {
+          console.error("Error al insertar el alumno:", err);
+          res.send({
+            status: 100,
+            errNo: err.errno,
+            mensaje: err.message,
+            codigo: err.code,
+          });
+        } else {
+          res.send({
+            status: 200,
+            result,
+          });
+        }
       }
-    }
-  );
+    );
+  } catch (error) {
+    res.send({
+      status: 100,
+      mensaje: "Error al cifrar la contraseña",
+      error: error.message,
+    });
+  }
 });
 
-app.post("/alumno/modificar", (req, res) => {
+// Ruta para modificar un alumno
+app.put("/alumno/modificar", async (req, res) => {
   const {
     matricula,
     aPaterno,
@@ -281,49 +295,63 @@ app.post("/alumno/modificar", (req, res) => {
     contraseña,
   } = req.body;
 
-  const sql = `UPDATE alumnos SET aPaterno = ?, aMaterno = ?, nombre = ?, sexo = ?, dCalle = ?, dNumero = ?, dColonia = ?, dCodigoPostal = ?, aTelefono = ?, aCorreo = ?, aFacebook = ?, aInstagram = ?, aTipoSangre = ?, nombreContacto = ?, telefonoContacto = ?, contraseña = ? WHERE matricula = ?`;
-  db.query(
-    sql,
-    [
-      aPaterno,
-      aMaterno,
-      nombre,
-      sexo,
-      dCalle,
-      dNumero,
-      dColonia,
-      dCodigoPostal,
-      aTelefono,
-      aCorreo,
-      aFacebook,
-      aInstagram,
-      aTipoSangre,
-      nombreContacto,
-      telefonoContacto,
-      contraseña,
-      matricula,
-    ],
-    (err, result) => {
-      if (err) {
-        res.send({
-          status: 100,
-          errNo: err.errno,
-          mensaje: err.message,
-          codigo: err.code,
-        });
-      } else {
-        res.send({
-          status: 200,
-          result,
-        });
+  try {
+    // Encriptar siempre la contraseña
+    const saltRounds = 12;
+    const hashedPassword = await bcrypt.hash(contraseña, saltRounds);
+    const sql = `UPDATE alumnos SET aPaterno = ?, aMaterno = ?, nombre = ?, sexo = ?, dCalle = ?, dNumero = ?, dColonia = ?, dCodigoPostal = ?, aTelefono = ?, aCorreo = ?, aFacebook = ?, aInstagram = ?, aTipoSangre = ?, nombreContacto = ?, telefonoContacto = ?, contrasenha = ? WHERE matricula = ?`;
+    db.query(
+      sql,
+      [
+        aPaterno,
+        aMaterno,
+        nombre,
+        sexo,
+        dCalle,
+        dNumero,
+        dColonia,
+        dCodigoPostal,
+        aTelefono,
+        aCorreo,
+        aFacebook,
+        aInstagram,
+        aTipoSangre,
+        nombreContacto,
+        telefonoContacto,
+        hashedPassword,
+        matricula,
+      ],
+      (err, result) => {
+        if (err) {
+          res.send({
+            status: 100,
+            errNo: err.errno,
+            mensaje: err.message,
+            codigo: err.code,
+          });
+        } else {
+          res.send({
+            status: 200,
+            result,
+          });
+        }
       }
-    }
-  );
+    );
+  } catch (error) {
+    res.send({
+      status: 100,
+      mensaje: "Error al encriptar la contraseña",
+      error: error.message,
+    });
+  }
 });
 
-// Ruta para eliminar un alumno por matrícula
+// Ruta para eliminar un alumno por matrícula (DELETE con query param)
 app.delete("/alumno/eliminar", (req, res) => {
-  const { matricula } = req.body;
+  const { matricula } = req.query;
+  if (!matricula) {
+    return res.status(400).json({ status: 400, message: "Matrícula requerida" });
+  }
   const sql = "DELETE FROM alumnos WHERE matricula = ?";
   db.query(sql, [matricula], (err, result) => {
     if (!err) {
