@@ -1,0 +1,10 @@
+export { default as ContenidoA } from "./ContenidoA";
+export { default as HomeA } from "./HomeA";
+export { default as AlumnosAgregar } from "./AlumnosAgregar";
+export { default as AlumnosConsultar } from "./AlumnosConsultar";
+export { default as AlumnoModificar } from "./AlumnoModificar";
+export { default as AlumnoEliminar } from "./AlumnoEliminar";
+export { default as Login } from "./Login";
+export { default as Mensajeria } from "./Mensajeria";
+export { default as Error404 } from "./Error404";
+export { default as Error500 } from "./Error500";
