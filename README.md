@@ -67,7 +67,7 @@ Sistema completo de gestión de alumnos para instituciones educativas con funcio
 ### 1. Clonar el Repositorio
 
 ```bash
-git clone https://github.com/tu-usuario/AlumnosB.git
+git clone https://github.com/tu-usuario/alumnosb.git
 cd AlumnosB
 ```
 
@@ -84,25 +84,27 @@ SOURCE back/database/messages_table.sql;
 
 ### 3. Configurar Variables de Entorno
 
+> ⚠️ **Advertencia de Seguridad:** Nunca incluyas tus claves reales (Client ID, Secret, etc.) en el README ni en el código fuente. Usa siempre variables de entorno y mantén tus secretos fuera del control de versiones.
+
 #### Backend (back/config.env)
 ```env
 # Configuración de Base de Datos
-DB_HOST=189.197.187.187
-DB_USER=umoodle
-DB_PASSWORD=Umoodl@2024$
-DB_NAME=alumnos
+DB_HOST=REEMPLAZA_CON_TU_CLAVE
+DB_USER=REEMPLAZA_CON_TU_CLAVE
+DB_PASSWORD=REEMPLAZA_CON_TU_CLAVE
+DB_NAME=REEMPLAZA_CON_TU_CLAVE
 
 # Configuración JWT
-JWT_SECRET=AlumnosB_SuperSecretKey_2024_$#@!%^&*()
+JWT_SECRET=REEMPLAZA_CON_TU_CLAVE
 JWT_EXPIRES_IN=24h
 
 # Google OAuth
-GOOGLE_CLIENT_ID=tu clave
-GOOGLE_CLIENT_SECRET=tu clave
+GOOGLE_CLIENT_ID=REEMPLAZA_CON_TU_CLAVE
+GOOGLE_CLIENT_SECRET=REEMPLAZA_CON_TU_CLAVE
 
 # reCAPTCHA
-RECAPTCHA_SITE_KEY=tu clave
-RECAPTCHA_SECRET_KEY=tu clave
+RECAPTCHA_SITE_KEY=REEMPLAZA_CON_TU_CLAVE
+RECAPTCHA_SECRET_KEY=REEMPLAZA_CON_TU_CLAVE
 
 # Configuración del Servidor
 PORT=5000
@@ -242,74 +244,4 @@ npm test
 ### Autenticación
 - `POST /auth/login` - Login tradicional
 - `POST /auth/google` - Login con Google
-- `POST /auth/register` - Registro de alumno
-- `GET /auth/me` - Obtener usuario actual
-
-### Mensajería
-- `POST /messages/send` - Enviar mensaje
-- `GET /messages/inbox` - Bandeja de entrada
-- `GET /messages/sent` - Mensajes enviados
-- `GET /messages/conversation/:id` - Conversación específica
-- `DELETE /messages/:id` - Eliminar mensaje
-
-### Alumnos
-- `GET /alumno` - Listar alumnos (con filtros)
-- `GET /alumno/traer/:id` - Obtener alumno específico
-- `POST /alumno/agregar` - Agregar alumno
-- `POST /alumno/modificar` - Modificar alumno
-- `DELETE /alumno/eliminar` - Eliminar alumno
-
-## 🐛 Solución de Problemas
-
-### Error de Conexión a Base de Datos
-```bash
-# Verificar configuración en config.env
-# Asegurar que MySQL esté ejecutándose
-# Verificar credenciales de acceso
-```
-
-### Error de CORS
-```bash
-# Verificar configuración en index.js
-# Asegurar que las URLs estén correctas
-```
-
-### Error de Autenticación Google
-```bash
-# Verificar claves OAuth en Google Cloud Console
-# Asegurar que las URIs estén configuradas
-```
-
-## 🤝 Contribución
-
-1. Fork el proyecto
-2. Crear rama para feature (`git checkout -b feature/AmazingFeature`)
-3. Commit cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abrir Pull Request
-
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE.md](LICENSE.md) para detalles.
-
-## 👥 Autores
-
-- **Tu Nombre** - *Desarrollo inicial* - [TuUsuario](https://github.com/TuUsuario)
-
-## 🙏 Agradecimientos
-
-- Bootstrap por el framework CSS
-- React por la librería de UI
-- Node.js por el runtime de JavaScript
-- MySQL por el sistema de base de datos
-
-## 📞 Soporte
-
-Para soporte técnico, contacta a:
-- Email: soporte@alumnosb.com
-- Teléfono: +52 618 123 4567
-- Documentación: [docs.alumnosb.com](https://docs.alumnosb.com)
-
----
-
-**AlumnosB** - Sistema de Gestión Universitaria Moderno y Seguro 🎓 
+- `
