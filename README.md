@@ -2,6 +2,9 @@
 
 Sistema completo de gestión de alumnos para instituciones educativas con funcionalidades avanzadas de autenticación, mensajería y administración de datos.
 
+> ⚠️ **Advertencia de Seguridad:**
+> Nunca subas contraseñas, claves secretas, tokens o cualquier información sensible al repositorio. Usa variables de entorno y archivos ignorados por Git (`.env`, `config.env`, etc.).
+
 ## 🚀 Características Principales
 
 ### 🔐 Autenticación y Seguridad
@@ -67,7 +70,7 @@ Sistema completo de gestión de alumnos para instituciones educativas con funcio
 ### 1. Clonar el Repositorio
 
 ```bash
-git clone https://github.com/tu-usuario/alumnosb.git
+git clone https://github.com/tu-usuario/AlumnosB.git
 cd AlumnosB
 ```
 
@@ -84,27 +87,25 @@ SOURCE back/database/messages_table.sql;
 
 ### 3. Configurar Variables de Entorno
 
-> ⚠️ **Advertencia de Seguridad:** Nunca incluyas tus claves reales (Client ID, Secret, etc.) en el README ni en el código fuente. Usa siempre variables de entorno y mantén tus secretos fuera del control de versiones.
-
 #### Backend (back/config.env)
 ```env
 # Configuración de Base de Datos
-DB_HOST=REEMPLAZA_CON_TU_CLAVE
-DB_USER=REEMPLAZA_CON_TU_CLAVE
-DB_PASSWORD=REEMPLAZA_CON_TU_CLAVE
-DB_NAME=REEMPLAZA_CON_TU_CLAVE
+DB_HOST=localhost
+DB_USER=usuario_db
+DB_PASSWORD=tu_password_seguro
+DB_NAME=alumnos
 
 # Configuración JWT
-JWT_SECRET=REEMPLAZA_CON_TU_CLAVE
+JWT_SECRET=una_clave_secreta_segura
 JWT_EXPIRES_IN=24h
 
 # Google OAuth
-GOOGLE_CLIENT_ID=REEMPLAZA_CON_TU_CLAVE
-GOOGLE_CLIENT_SECRET=REEMPLAZA_CON_TU_CLAVE
+GOOGLE_CLIENT_ID=tu_google_client_id
+GOOGLE_CLIENT_SECRET=tu_google_client_secret
 
 # reCAPTCHA
-RECAPTCHA_SITE_KEY=REEMPLAZA_CON_TU_CLAVE
-RECAPTCHA_SECRET_KEY=REEMPLAZA_CON_TU_CLAVE
+RECAPTCHA_SITE_KEY=tu_recaptcha_site_key
+RECAPTCHA_SECRET_KEY=tu_recaptcha_secret_key
 
 # Configuración del Servidor
 PORT=5000
@@ -193,6 +194,16 @@ npm run build
 2. Obtener claves pública y privada
 3. Configurar en variables de entorno
 
+## 🛡️ Buenas Prácticas de Seguridad
+
+- **Nunca subas archivos con secretos**: Usa `.gitignore` para excluir archivos como `.env`, `config.env`, etc.
+- **Revisa antes de hacer push**: Verifica que no haya claves o contraseñas en los archivos que vas a subir.
+- **Utiliza variables de entorno**: Configura tus claves y contraseñas en archivos de entorno locales, nunca en el código fuente.
+- **Revoca y reemplaza secretos expuestos**: Si accidentalmente subiste un secreto, revócalo y reemplázalo inmediatamente.
+- **Activa la protección de secretos en GitHub**: Usa las herramientas de escaneo de secretos que ofrece GitHub para evitar pushes accidentales.
+- **No compartas capturas de pantalla con secretos**: Si compartes imágenes del código, asegúrate de ocultar cualquier información sensible.
+- **Haz revisiones de seguridad periódicas**: Revisa el historial de commits y el código para asegurarte de que no haya información sensible expuesta.
+
 ## 📊 Estructura del Proyecto
 
 ```
@@ -225,23 +236,57 @@ AlumnosB/
 └── README.md                    # Este archivo
 ```
 
-## 🧪 Testing
-
-### Backend
-```bash
-cd back
-npm test
-```
-
-### Frontend
-```bash
-cd front
-npm test
-```
 
 ## 📝 API Endpoints
 
 ### Autenticación
 - `POST /auth/login` - Login tradicional
 - `POST /auth/google` - Login con Google
-- `
+- `POST /auth/register` - Registro de alumno
+- `GET /auth/me` - Obtener usuario actual
+
+### Mensajería
+- `POST /messages/send` - Enviar mensaje
+- `GET /messages/inbox` - Bandeja de entrada
+- `GET /messages/sent` - Mensajes enviados
+- `GET /messages/conversation/:id` - Conversación específica
+- `DELETE /messages/:id` - Eliminar mensaje
+
+### Alumnos
+- `GET /alumno` - Listar alumnos (con filtros)
+- `GET /alumno/traer/:id` - Obtener alumno específico
+- `POST /alumno/agregar` - Agregar alumno
+- `POST /alumno/modificar` - Modificar alumno
+- `DELETE /alumno/eliminar` - Eliminar alumno
+
+## 🐛 Solución de Problemas
+
+### Error de Conexión a Base de Datos
+```bash
+# Verificar configuración en config.env
+# Asegurar que MySQL esté ejecutándose
+# Verificar credenciales de acceso
+```
+
+### Error de CORS
+```bash
+# Verificar configuración en index.js
+# Asegurar que las URLs estén correctas
+```
+
+### Error de Autenticación Google
+```bash
+# Verificar claves OAuth en Google Cloud Console
+# Asegurar que las URIs estén configuradas
+```
+
+## 🤝 Contribución
+
+1. Fork el proyecto
+2. Crear rama para feature (`git checkout -b feature/AmazingFeature`)
+3. Commit cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abrir Pull Request
+
+
+**AlumnosB** - Sistema de Gestión Universitaria Moderno y Seguro 🎓 
