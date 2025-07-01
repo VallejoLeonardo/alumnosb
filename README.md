@@ -142,19 +142,6 @@ cd front
 npm start
 ```
 
-### Producción
-
-#### Backend
-```bash
-cd back
-npm run prod
-```
-
-#### Frontend
-```bash
-cd front
-npm run build
-```
 
 ## 📱 Uso de la Aplicación
 
