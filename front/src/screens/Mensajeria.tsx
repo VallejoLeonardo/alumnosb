@@ -41,6 +41,12 @@ const Mensajeria: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showConversation, setShowConversation] = useState(false);
   const [error, setError] = useState('');
+  const [isNewMessage, setIsNewMessage] = useState(false);
+  // Estados para enviados
+  const [activeTab, setActiveTab] = useState<'inbox' | 'sent'>('inbox');
+  const [sentMessages, setSentMessages] = useState<Message[]>([]);
+  const [sentTotalPages, setSentTotalPages] = useState(1);
+  const [sentCurrentPage, setSentCurrentPage] = useState(1);
 
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -111,9 +117,16 @@ const Mensajeria: React.FC = () => {
 
       if (response.data.status === 201) {
         setNewMessage('');
-        // Recargar conversación
-        await loadConversation(selectedUser);
-        
+        if (isNewMessage) {
+          setIsNewMessage(false);
+          setShowConversation(false);
+          setSelectedUser('');
+          setConversation([]);
+          await loadInbox();
+        } else {
+          // Recargar conversación
+          await loadConversation(selectedUser);
+        }
         Swal.fire({
           title: '¡Mensaje enviado!',
           text: 'Tu mensaje se ha enviado exitosamente',
@@ -197,6 +210,39 @@ const Mensajeria: React.FC = () => {
     message.contenido.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  /**
+   * Carga mensajes enviados
+   */
+  const loadSent = async () => {
+    setIsLoading(true);
+    try {
+      const response = await api.get(`/messages/sent?page=${sentCurrentPage}&limit=10`);
+      if (response.data.status === 200) {
+        setSentMessages(response.data.messages);
+        setSentTotalPages(response.data.pagination.totalPages);
+      }
+    } catch (error: any) {
+      setError('Error al cargar los mensajes enviados');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Cambia la pestaña y carga los mensajes correspondientes
+  useEffect(() => {
+    if (activeTab === 'inbox') {
+      loadInbox();
+    } else {
+      loadSent();
+    }
+    // eslint-disable-next-line
+  }, [activeTab, currentPage, sentCurrentPage]);
+
+  // Cambia la página de enviados
+  const handleSentPageChange = (selectedItem: { selected: number }) => {
+    setSentCurrentPage(selectedItem.selected + 1);
+  };
+
   return (
     <Container fluid className="py-4">
       <Row>
@@ -221,15 +267,47 @@ const Mensajeria: React.FC = () => {
             <Card.Header>
               <div className="d-flex justify-content-between align-items-center">
                 <h5 className="mb-0">Bandeja de Entrada</h5>
-                <Button
-                  variant="outline-primary"
-                  size="sm"
-                  onClick={loadInbox}
-                  disabled={isLoading}
-                >
-                  <FaSearch className="me-1" />
-                  Actualizar
-                </Button>
+                <div>
+                  {/* Pestañas Recibidos/Enviados */}
+                  <Button
+                    variant={activeTab === 'inbox' ? 'primary' : 'outline-primary'}
+                    size="sm"
+                    className="me-1"
+                    onClick={() => setActiveTab('inbox')}
+                  >
+                    Recibidos
+                  </Button>
+                  <Button
+                    variant={activeTab === 'sent' ? 'primary' : 'outline-primary'}
+                    size="sm"
+                    className="me-2"
+                    onClick={() => setActiveTab('sent')}
+                  >
+                    Enviados
+                  </Button>
+                  <Button
+                    variant="success"
+                    size="sm"
+                    className="me-2"
+                    onClick={() => {
+                      setIsNewMessage(true);
+                      setShowConversation(true);
+                      setSelectedUser('');
+                      setConversation([]);
+                    }}
+                  >
+                    Nuevo mensaje
+                  </Button>
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    onClick={activeTab === 'inbox' ? loadInbox : loadSent}
+                    disabled={isLoading}
+                  >
+                    <FaSearch className="me-1" />
+                    Actualizar
+                  </Button>
+                </div>
               </div>
             </Card.Header>
             <Card.Body>
@@ -239,6 +317,7 @@ const Mensajeria: React.FC = () => {
                   placeholder="Buscar mensajes..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  disabled={isLoading}
                 />
               </Form.Group>
 
@@ -250,16 +329,25 @@ const Mensajeria: React.FC = () => {
                 </div>
               ) : (
                 <ListGroup variant="flush">
-                  {filteredMessages.map((message) => (
+                  {(activeTab === 'inbox' ? filteredMessages : sentMessages).map((message) => (
                     <ListGroup.Item
                       key={message.id}
                       action
-                      onClick={() => loadConversation(message.remitente_matricula)}
+                      onClick={() => {
+                        if (activeTab === 'inbox') {
+                          loadConversation(message.remitente_matricula);
+                        } else {
+                          // Para enviados, mostrar conversación con el destinatario
+                          loadConversation(message.destinatario_matricula);
+                        }
+                      }}
                       className="d-flex justify-content-between align-items-start"
                     >
                       <div className="ms-2 me-auto">
                         <div className="fw-bold">
-                          {message.remitente_nombre} {message.remitente_apellido}
+                          {activeTab === 'inbox'
+                            ? `${message.remitente_nombre} ${message.remitente_apellido}`
+                            : `${message.destinatario_nombre} ${message.destinatario_apellido}`}
                         </div>
                         <div className="text-muted small">
                           {message.contenido.substring(0, 50)}...
@@ -269,7 +357,7 @@ const Mensajeria: React.FC = () => {
                         </small>
                       </div>
                       <div>
-                        {!message.leido && (
+                        {activeTab === 'inbox' && !message.leido && (
                           <Badge bg="primary" className="me-2">
                             Nuevo
                           </Badge>
@@ -290,13 +378,14 @@ const Mensajeria: React.FC = () => {
                 </ListGroup>
               )}
 
-              {totalPages > 1 && (
+              {/* Paginación */}
+              {(activeTab === 'inbox' ? totalPages : sentTotalPages) > 1 && (
                 <div className="d-flex justify-content-center mt-3">
                   <ReactPaginate
                     previousLabel="Anterior"
                     nextLabel="Siguiente"
-                    pageCount={totalPages}
-                    onPageChange={handlePageChange}
+                    pageCount={activeTab === 'inbox' ? totalPages : sentTotalPages}
+                    onPageChange={activeTab === 'inbox' ? handlePageChange : handleSentPageChange}
                     containerClassName="pagination"
                     pageClassName="page-item"
                     pageLinkClassName="page-link"
@@ -315,77 +404,131 @@ const Mensajeria: React.FC = () => {
         {/* Conversación */}
         <Col lg={8}>
           {showConversation ? (
-            <Card>
-              <Card.Header>
-                <div className="d-flex justify-content-between align-items-center">
-                  <h5 className="mb-0">
-                    Conversación con {conversation[0]?.remitente_nombre} {conversation[0]?.remitente_apellido}
-                  </h5>
-                  <Button
-                    variant="outline-secondary"
-                    size="sm"
-                    onClick={() => setShowConversation(false)}
-                  >
-                    Cerrar
-                  </Button>
-                </div>
-              </Card.Header>
-              <Card.Body>
-                <div className="conversation-container" style={{ height: '400px', overflowY: 'auto' }}>
-                  {conversation.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`mb-3 ${
-                        msg.remitente_matricula === user.matricula ? 'text-end' : 'text-start'
-                      }`}
+            isNewMessage ? (
+              <Card>
+                <Card.Header>
+                  <div className="d-flex justify-content-between align-items-center">
+                    <h5 className="mb-0">Nuevo mensaje</h5>
+                    <Button
+                      variant="outline-secondary"
+                      size="sm"
+                      onClick={() => {
+                        setIsNewMessage(false);
+                        setShowConversation(false);
+                        setSelectedUser('');
+                        setConversation([]);
+                        setNewMessage('');
+                      }}
                     >
-                      <div
-                        className={`d-inline-block p-3 rounded ${
-                          msg.remitente_matricula === user.matricula
-                            ? 'bg-primary text-white'
-                            : 'bg-light'
-                        }`}
-                        style={{ maxWidth: '70%' }}
-                      >
-                        <div className="small mb-1">
-                          {msg.remitente_matricula === user.matricula ? 'Tú' : `${msg.remitente_nombre} ${msg.remitente_apellido}`}
-                        </div>
-                        <div>{msg.contenido}</div>
-                        <div className="small mt-1 opacity-75">
-                          {formatDate(msg.fecha_envio)}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-3">
+                      Cerrar
+                    </Button>
+                  </div>
+                </Card.Header>
+                <Card.Body>
                   <Form.Group className="mb-3">
+                    <Form.Label>Destinatario (matrícula)</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Matrícula del destinatario"
+                      value={selectedUser}
+                      onChange={(e) => setSelectedUser(e.target.value)}
+                      disabled={isLoading}
+                    />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Mensaje</Form.Label>
                     <Form.Control
                       as="textarea"
                       rows={3}
                       placeholder="Escribe tu mensaje..."
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          sendMessage();
-                        }
-                      }}
+                      disabled={isLoading}
                     />
                   </Form.Group>
                   <Button
                     variant="primary"
                     onClick={sendMessage}
-                    disabled={!newMessage.trim() || isLoading}
+                    disabled={!newMessage.trim() || !selectedUser || isLoading}
                   >
                     <FaPaperPlane className="me-2" />
                     Enviar
                   </Button>
-                </div>
-              </Card.Body>
-            </Card>
+                </Card.Body>
+              </Card>
+            ) : (
+              <Card>
+                <Card.Header>
+                  <div className="d-flex justify-content-between align-items-center">
+                    <h5 className="mb-0">
+                      Conversación con {conversation[0]?.remitente_nombre} {conversation[0]?.remitente_apellido}
+                    </h5>
+                    <Button
+                      variant="outline-secondary"
+                      size="sm"
+                      onClick={() => setShowConversation(false)}
+                    >
+                      Cerrar
+                    </Button>
+                  </div>
+                </Card.Header>
+                <Card.Body>
+                  <div className="conversation-container" style={{ height: '400px', overflowY: 'auto' }}>
+                    {conversation.map((msg) => (
+                      <div
+                        key={msg.id}
+                        className={`mb-3 ${
+                          msg.remitente_matricula === user.matricula ? 'text-end' : 'text-start'
+                        }`}
+                      >
+                        <div
+                          className={`d-inline-block p-3 rounded ${
+                            msg.remitente_matricula === user.matricula
+                              ? 'bg-primary text-white'
+                              : 'bg-light'
+                          }`}
+                          style={{ maxWidth: '70%' }}
+                        >
+                          <div className="small mb-1">
+                            {msg.remitente_matricula === user.matricula ? 'Tú' : `${msg.remitente_nombre} ${msg.remitente_apellido}`}
+                          </div>
+                          <div>{msg.contenido}</div>
+                          <div className="small mt-1 opacity-75">
+                            {formatDate(msg.fecha_envio)}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-3">
+                    <Form.Group className="mb-3">
+                      <Form.Control
+                        as="textarea"
+                        rows={3}
+                        placeholder="Escribe tu mensaje..."
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            sendMessage();
+                          }
+                        }}
+                      />
+                    </Form.Group>
+                    <Button
+                      variant="primary"
+                      onClick={sendMessage}
+                      disabled={!newMessage.trim() || isLoading}
+                    >
+                      <FaPaperPlane className="me-2" />
+                      Enviar
+                    </Button>
+                  </div>
+                </Card.Body>
+              </Card>
+            )
           ) : (
             <Card>
               <Card.Body className="text-center py-5">
