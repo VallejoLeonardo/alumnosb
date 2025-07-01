@@ -56,7 +56,8 @@ function App() {
     <GoogleOAuthProvider clientId="616551878562-vipouo08u4v2o1fasmj0tv8bjp8gqek8.apps.googleusercontent.com">
       <div className="App">
         <BrowserRouter>
-          {isAuthenticated && <Navigation onLogout={handleLogout} />}
+          {/* Mostrar Navigation solo si está autenticado y no en /login */}
+          {isAuthenticated && window.location.pathname !== '/login' && <Navigation onLogout={handleLogout} />}
           
           <Routes>
             {/* Rutas públicas */}
